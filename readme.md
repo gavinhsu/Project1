@@ -82,21 +82,27 @@ Each country has a related site with its flag embedded, as in the URL:
 Only the top 20 countries by population will be used. Figure 1 show the initial input screen.  For your web application, scrape the URL for the flag chosen from a drop-down box of country names). Be sure to include your name as the author.  Figure 2 shows the country drop-down box.
 
 ![Figure 1](figure1.png)
-*Figure 1*
+***Figure 1***
 
 ![Figure 2](figure2.png)
-*Figure 2*
+***Figure 2***
 
-On the same page, use radio buttons to choose one year from 2011 - 2016. The data will come from the World Health Organization (WHO) Global Health Observatory (GHO) web site. While this site has many health statistics, this project will only use one, the Adult Mortality Rate, only for one year, for both sexes.
+On the same page, use radio buttons to choose one year from 2011 - 2016. The data will come from the World Health Organization (WHO) Global Health Observatory (GHO) web site. While this site has many health statistics, this project will only use one, the Adult Mortality Rate, only for one year, for both sexes. You can find information about GHO at:
+
+> https://www.who.int/data/gho
+
+and information about the Athena API at:
+
+> https://www.who.int/data/gho/info/athena-api
 
 Use the WHO GHO Athena site's API at:
 
-    https://apps.who.int/gho/athena/api/GHO
+> https://apps.who.int/gho/athena/api/GHO
 
 To use the API, construct an HTTP GET query by appending the Adult Mortality Rate's code,
 /WHOSIS_000004/, followed by:
 
-?filter=COUNTRY:\<code\>;YEAR:\<year\>;SEX:BTSX&format=json&profile=simple
+> ?filter=COUNTRY:\<code\>;YEAR:\<year\>;SEX:BTSX&format=json&profile=simple
 
 where \<code\> is the three-letter ISO 3166 country code, \<year\> is one of 2011-2016, BTSX means both sexes, in simple JSON format.  See if you can construct this URL manually for Brazil (BRA) for 2016, then type it into your browser's address bar to see the resulting JSON record. The data you want should be in the last entry, tagged as "Value": "143".
 
@@ -106,7 +112,7 @@ Use a URL object (its constructor takes the string URL as a parameter); that obj
 Figure 3 shows the output screen. It contains the country's name and flag (with the web site citation), plus the mortality data.
 
 ![Figure 3](figure3.png)
-*Figure 3*
+***Figure 3***
 
 When the user presses the "Continue" button, return to the original screen.
 
@@ -116,20 +122,22 @@ displayed by a browser and can be a useful tool when your data source does not
 have an API that provides structured data. Instead, you can search or parse the
 HTML to find and extract the data that you need. For more information, see
 
-   https://en.wikipedia.org/wiki/Web_scraping
+> https://en.wikipedia.org/wiki/Web_scraping
 
 Your application should work similarly to InterestingPicture, but instead of
 searching Flickr, it will use the CIA World Factbook site.
 
 ## JSON
 
-JSON records are text records containing tag-value pairs, where the tag is the field name - think of it as a dictionary or map with nesting. It is much shorter than XML. In order to find what you need, you can <b>EITHER</b> search the resulting string for what you need, <b>OR</b> you can use a JSON library like GSON. To use the latter, download the gson v.2.8.6 jar file to a place you'll remember. To add it to your project - assuming it's a Maven project - go to File->Project Structure->Modules, choose the Dependencies tab, click the + icon at the bottom choose Jars or Directories, navigate to where you put the jar file, click that, then Apply and OK. It should show up in your pom.xml file as the last entry in <dependiences> as:
+JSON records are text records containing tag-value pairs, where the tag is the field name - think of it as a dictionary or map with nesting. It is much shorter than XML. In order to find what you need, you can **EITHER** search the resulting string for what you need, **OR** you can use a JSON library like GSON. To use the latter, download the gson v.2.8.6 jar file to a place you'll remember. To add it to your project - assuming it's a Maven project - go to File->Project Structure->Modules, choose the Dependencies tab, click the + icon at the bottom choose Jars or Directories, navigate to where you put the jar file, click that, then Apply and OK. It should show up in your pom.xml file as the last entry in <dependiences> as:
 
+```
 <dependency>
     <groupId>com.google.code.gson</groupId>
     <artifactId>gson</artifactId>
     <version>2.8.6</version>
 </dependency>
+```
 
 As a hint, the "Value" tag is a JsonPrimitive in a JsonObject that is the 0th entry in a JsonArray that is itself a JsonObject (whew!). You can use methods like getAsJsonObject() and its relatives to extract what you need. Again: this is optional.
 
@@ -161,7 +169,75 @@ jsoup API to understand this when you need it.)
 If you do not use jsoup, here is a code to replace the fetch method in
 InterestingPictureModel to ignore the exception:
 
-    Joe's code here
+```
+    private String fetch(String searchURL) {
+        try {
+            // Create trust manager, which lets you ignore SSLHandshakeExceptions
+            createTrustManager();
+        } catch (KeyManagementException ex) {
+            System.out.println("Shouldn't come here: ");
+            ex.printStackTrace();
+        } catch (NoSuchAlgorithmException ex) {
+            System.out.println("Shouldn't come here: ");
+            ex.printStackTrace();
+        }
+
+        String response = "";
+        try {
+            URL url = new URL(searchURL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            // Read all the text returned by the server
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+            String str;
+            // Read each line of "in" until done, adding each to "response"
+            while ((str = in.readLine()) != null) {
+                // str is one line of text readLine() strips newline characters
+                response += str;
+            }
+            in.close();
+        } catch (IOException e) {
+            System.err.println("Something wrong with URL");
+            return null;
+        }
+        return response;
+    }
+
+    private void createTrustManager() throws KeyManagementException, NoSuchAlgorithmException{
+        /**
+         * Annoying SSLHandShakeException. After trying several methods, finally this
+         * seemed to work.
+         * Taken from: http://www.nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
+         */
+        // Create a trust manager that does not validate certificate chains
+        TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }
+        };
+
+        // Install the all-trusting trust manager
+        SSLContext sc = SSLContext.getInstance("SSL");
+        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+        // Create all-trusting host name verifier
+        HostnameVerifier allHostsValid = new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        };
+
+        // Install the all-trusting host verifier
+        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+    }
+
+```
 
 Track Piazza for additional hints and answers to questions.
 
@@ -226,11 +302,11 @@ Implement a web application that implements a simple desktop and mobile
 “clicker” for class.  Your app should allow users to submit answers to questions
 posed in class, and should provide a separate URL end point for getting the
 results of the submitted responses.  The welcome page for your app should be
-similar to Figure 6.  You can make it more stylish if you like,
+similar to Figure 4.  You can make it more stylish if you like,
 but it is not required.
 
-![Figure 6](figure6.png)
-*Figure 6*
+![Figure 4](figure4.png)
+***Figure 4***
 
 When the user makes a choice and hits “submit”, their answer should be stored in
 your MVC model.  The response should be similar to the picture on the left.
@@ -240,15 +316,15 @@ that they made (i.e. “D” in this example).
 The user should also have the ability to submit another answer as shown in the
 screenshot.
 
-![Figure 7](figure7.png)
-*Figure 7*
+![Figure 5](figure5.png)
+***Figure 5***
 
 You can test the application by repeatedly submitting answers and allowing your
 model to tally the results.  Your web app should also have a URL path
-“/getResults” (shown in Figure 8) for listing the results of user voting.
+“/getResults” (shown in Figure 6) for listing the results of user voting.
 
-![Figure 8](figure8.png)
-*Figure 8*
+![Figure 6](figure6.png)
+***Figure 6***
 
 ## Requirements for the /getResults path:
 
@@ -256,17 +332,17 @@ model to tally the results.  Your web app should also have a URL path
 2. You do not have to list options that have been chosen zero times.
 3. The results should be displayed sorted in alphabetical order.
 4. /getResults should also clear the stored results so that a new question can be posed.
-5. If there are no results available, then report this as shown in Figure 9.
+5. If there are no results available, then report this as shown in Figure 7.
 
-![Figure 9](figure9.png)
-*Figure 9*
+![Figure 7](figure7.png)
+***Figure 7***
 
 Note that requirement 4 does not adhere to the HTTP standard for a GET request.
 You should understand why this is bad behavior according to the standard, and
 how you could fix it (It might be on the exam).
 
-![Figure 10](figure10.png)
-*Figure 10*
+![Figure 8](figure8.png)
+***Figure 8***
 
 The web app should work with a mobile browser.  For this project you can use a simple
 check like the one that was used in InterestingPicture and then use an appropriate mobile doctype.
@@ -282,11 +358,11 @@ Using the Google Chrome browser.
   app working for mobile.  If your page looks like the one on the right, even
   after reloading, then the doctype is not being set correctly.   
 
-Figure 11 is what the web app should look like for mobile if the
+Figure 9 is what the web app should look like for mobile if the
 doctype is set correctly.
 
-![Figure 11](figure11.png)
-*Figure 11*
+![Figure 9](figure9.png)
+***Figure 9***
 
 ## Overall web app requirements:
 - You must use MVC to separate concerns.
@@ -369,17 +445,17 @@ work. (If you upload your video to YouTube, make sure your video is selected as
 
 Now you should have for .zip files and three description folders:
 
-![Mac OS](figure12.png)
-*Mac OS*
+![Mac OS](figure10.png)
+***Mac OS***
 
 Create a new empty folder named with your Andrew id (very important). Put all
 files mentioned above in to the new folder you created.
 
-![Windows 10](figure13.png)
-*Windows 10*
+![Windows 10](figure11.png)
+***Windows 10***
 
-![Mac OS](figure14.png)
-*Mac OS*
+![Mac OS](figure12.png)
+***Mac OS***
 
 Zip that folder, and submit it to Canvas. The submission should be a single zip file.
 Now you should have only one .zip file named with your Andrew id:
@@ -393,5 +469,5 @@ YourAndrewID.zip
 --- Project1Task2 Description
 --- Project1Task3 Description
 
-![Zip](figure15.png)
-*Zip*
+![Zip](figure13.png)
+***Zip***

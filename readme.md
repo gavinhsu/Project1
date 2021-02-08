@@ -167,75 +167,75 @@ If you use jsoup, you should use validateTLSCertificates(false). (Refer to the
 jsoup API to understand this when you need it.)
 
 If you do not use jsoup, here is a code to replace the fetch method in
-InterestingPictureModel to ignore the exception:
+InterestingPictureModel to ignore the exception. The parameter "certType" should be set to the string "TLSV1.3".
 
 ```
-    private String fetch(String searchURL) {
-        try {
-            // Create trust manager, which lets you ignore SSLHandshakeExceptions
-            createTrustManager();
-        } catch (KeyManagementException ex) {
-            System.out.println("Shouldn't come here: ");
-            ex.printStackTrace();
-        } catch (NoSuchAlgorithmException ex) {
-            System.out.println("Shouldn't come here: ");
-            ex.printStackTrace();
+private String fetch(String searchURL, String certType) {
+    try {
+        // Create trust manager, which lets you ignore SSLHandshakeExceptions
+        createTrustManager(certType);
+    } catch (KeyManagementException ex) {
+        System.out.println("Shouldn't come here: ");
+        ex.printStackTrace();
+    } catch (NoSuchAlgorithmException ex) {
+        System.out.println("Shouldn't come here: ");
+        ex.printStackTrace();
+    }
+
+    String response = "";
+    try {
+        URL url = new URL(searchURL);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+        // Read all the text returned by the server
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+        String str;
+        // Read each line of "in" until done, adding each to "response"
+        while ((str = in.readLine()) != null) {
+            // str is one line of text readLine() strips newline characters
+            response += str;
         }
+        in.close();
+    } catch (IOException e) {
+        System.err.println("Something wrong with URL");
+        return null;
+    }
+    return response;
+}
 
-        String response = "";
-        try {
-            URL url = new URL(searchURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            // Read all the text returned by the server
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
-            String str;
-            // Read each line of "in" until done, adding each to "response"
-            while ((str = in.readLine()) != null) {
-                // str is one line of text readLine() strips newline characters
-                response += str;
-            }
-            in.close();
-        } catch (IOException e) {
-            System.err.println("Something wrong with URL");
+private void createTrustManager(String certType) throws KeyManagementException, NoSuchAlgorithmException{
+    /**
+     * Annoying SSLHandShakeException. After trying several methods, finally this
+     * seemed to work.
+     * Taken from: http://www.nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
+     */
+    // Create a trust manager that does not validate certificate chains
+    TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
+        public X509Certificate[] getAcceptedIssuers() {
             return null;
         }
-        return response;
-    }
-
-    private void createTrustManager() throws KeyManagementException, NoSuchAlgorithmException{
-        /**
-         * Annoying SSLHandShakeException. After trying several methods, finally this
-         * seemed to work.
-         * Taken from: http://www.nakov.com/blog/2009/07/16/disable-certificate-validation-in-java-ssl-connections/
-         */
-        // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[] {new X509TrustManager() {
-            public X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
-            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-            }
-            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-            }
+        public void checkClientTrusted(X509Certificate[] certs, String authType) {
         }
-        };
-
-        // Install the all-trusting trust manager
-        SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-        // Create all-trusting host name verifier
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
-
-        // Install the all-trusting host verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        public void checkServerTrusted(X509Certificate[] certs, String authType) {
+        }
     }
+    };
+
+    // Install the all-trusting trust manager
+    SSLContext sc = SSLContext.getInstance(certType);
+    sc.init(null, trustAllCerts, new java.security.SecureRandom());
+    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+    // Create all-trusting host name verifier
+    HostnameVerifier allHostsValid = new HostnameVerifier() {
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    };
+
+    // Install the all-trusting host verifier
+    HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+}
 
 ```
 

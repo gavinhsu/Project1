@@ -269,11 +269,11 @@ Submit ***one*** PDF containing the following; each part should being with the h
 2. **Code snippets** of computation of each hash
 
 ### Task 2:
-1. **Screen shots** of input page, drop-down menu, output page for United States and Great Britain.
+1. **Screen shots** of input page, drop-down menu, output page for Collie and Whippet.
 2. **Code snippets** for:
-- scraping of population and gdp
-- scraping of medals
-- scraping of flag
+- scraping of intelligence
+- scraping of weight
+- api call for the picture, including choosing one at random.
 
 ### Task 3:
 1. **Screen shots** of the input page, output page (one vote), results page

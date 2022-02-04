@@ -242,7 +242,6 @@ Figure 9 is what the web app should look like for mobile if the doctype is set c
 
 ## Overall web app requirements:
 - You must use MVC to separate concerns.
-- Use appropriate HTTP methods (i.e. not just GET)
 - Implement only one HttpServlet
 
 ## Hints:

@@ -1,7 +1,7 @@
 # 95-702 Distributed Systems
 # Project 1
-## Assigned: Friday, January 28, 2022
-## Due: Friday, February 11, 2022, 11:59 PM
+## Assigned: Friday, September 9, 2022
+## Due: Friday, September 23, 2022, 11:59 PM
 
 This project has five objectives:
 
@@ -9,7 +9,7 @@ This project has five objectives:
 
 **Second**, you build your first set of distributed systems. These are two small web applications using Servlets and Java Server Pages.
 
-**Third**, you are introduced to web scraping, API processing, and JSON records.
+**Third**, you are introduced to web scraping and API processing.
 
 **Fourth**, you are introduced to the MVC pattern if you have not used it before.
 
@@ -17,7 +17,9 @@ And **fifth**, as in all projects this semester, you should reflect on the funct
 write (Java files and so on) must contain comments that describe what each significant piece of code is intended to accomplish. Points will be deducted if code is not well documented. Read the documentation-related links provided on the course schedule (for class #1) to understand what is expected. Be sure to consult the rubric for details on grading.
 
 # Deliverables
-There are two parts to deliver, all zipped into one file for upload: - one PDF containing relevant screeenshots of all the parts followed by code snippets (which is relative: how much to include is up to you for each part) that produced the result shown in the screenshot. Each section of the PDF must be clearly labeled. - your projects, each zipped, with all of the three tasks zipped together.
+There are two parts to deliver, all zipped into one file for upload:
+- one PDF containing relevant screenshots of all the parts followed by code snippets (which is relative: how much to include is up to you for each part) that produced the result shown in the screenshot. Each section of the PDF must be clearly labeled.
+- your projects, each zipped, with all of the three tasks zipped together. See the last section below for zip instructions. Note that any delivery/format problems will result in lost marks.
 
 See the end for more detail, but read the project task descriptions first so that you know what the details are talking about.
 
@@ -46,9 +48,9 @@ Be sure to create screen shots of your working application and submit them as de
 # Task 2
 ## Use IntelliJ Project Name: Project1Task2
 
-Task 2 is meant to give you practice with several things: servlet programming, web scraping, API's, JSON, and MVC. It also gives dogs more web exposure to compete with smelly cats.
+Task 2 is meant to give you practice with several things: servlet programming, web scraping, API's and MVC. The application displays information about U.S. states: the state's population, the state's nickname, the state capital, the state song, an image of the state flower, and an image of the state flag.
 
-Your program will present a welcome screen containing a title, your name, and a drop-down menu of a limited number of dog breeds, as in Figure 1 and Figure 2. The Submit button is used to record the user's choice. Note that you will need to learn about HTML drop-down menus on your own.
+Your program will present a welcome screen containing a title, your name, and a drop-down menu of the states of the United States, as in Figure 1 and Figure 2 (only some of the drop-down menu is shown). The Submit button is used to record the user's choice. Note that you will need to learn about HTML drop-down menus on your own (for example, see the W3Schools link below).
 
 ## Input
 ![Figure 1](figure1.png)
@@ -60,22 +62,45 @@ Your program will present a welcome screen containing a title, your name, and a 
 ***Figure 2***
 
 ## Output
-Figure 3 shows the output screen. Several facts have been scraped from the web site:
-
-> https://dogtime.com/dog-breeds/profiles
+Figure 3 shows the output screen for Pennsylvania. The data comes from scraping several sites and one API.
 
 ![Figure 3](figure3.png)
-***Figure 3: Good boy! Sit!***
+***Figure 3: State Data***
 
-These facts include the star ratings for friendliness and intelligence, the height and weight ranges of the breed, and the expected lifespan. All of these must be scraped. Also note the credit string for the web site.
+The state nickname (there might be more than one) must be scraped from the site
 
-Next, a picture of a representative of the breed is shown. This is retrieved from a different site:
+>https://britannica.com/topic/List-of-nicknames-of-U-S-States-2130544
 
-> https://dog.ceo/dog-api/
+The state capital city must be scraped from the site
 
-using that site's API.  Again, note the credit string.
+>https://gisgeography.com/united-states-map-with-capitals
 
-You'll have to figure out how to construct a proper API request. When you query this site, a ***JSON record*** is returned, containing a number of URL's for pictures of dogs of the chosen breed. Choose *one* of these URL's ***at random***. To do this, you'll need to understand JSON records and the Java Random class. See below for some information on including JSON into your project, which is required. (*Note:* we could have scraped a picture URL from the first web site, but the point here is to use an API.)
+The state song (there might be more than one) must be scraped from the site
+
+> https://50states.com/songs/
+
+The state flower must be scraped from the site
+
+>https://statesymbolsusa.org/categories/flower
+
+Note that the flower image is actually a URL of an image (think about how Interesting Picture got its image). While the URL could be simply constructed once you see the pattern, you **must** scrape the URL. Failure to do so will result in a 20 point deduction.
+
+The state flag image is similar: scrape the URL from the sites
+
+> https://states101.com/flags
+
+Again, you could construct this, but you **must** scrape the URL. Failure to do so will result in a 20 point deduction.
+
+The state population comes from the U.S. Census Bureau API. The format for the request is:
+
+ht<span>tps://api.census.gov/data/2020/dec/pl?get=NAME,P1_001N&for=state:
+[put the state FIPS code here]&key=[put your API key here]
+
+The FIPS code is a standard id for U.S. cities and states; see the file fips.csv for the list and use this in your program. Apply for an API key at:
+
+>https://api.census.gov/data/key_signup.html
+
+Once you have an API key, test it: copy the URL above into a browser address bar, using (say) 42 as the FIPS code (Pennsylvania's code). This will return a Python-style list of lists (using square brackets). You'll have to parse it in your program to extract the population value.
 
 When the user presses the "Continue" button, return to the original screen.
 
@@ -90,25 +115,11 @@ Your application should work similarly to InterestingPicture, but instead of sea
 
 - You are allowed to and encouraged to build your solution based on the InterestingPicture code you have been given in class. You MUST refactor it, however, to have project, variable, and class names that make sense for your application. For example, <b>you will lose points</b> if your class is still named InterestingPictureServlet.
 
-- You do not need to, but you are welcome to, use jsoup (https://jsoup.org/) which is a Java HTML Parser, to do the flag scraping.  The downsides of using jsoup are you will first need to understand the Document Object Model (DOM) and CSS Selectors. These are both useful to know.  o The upside of using jsoup is that it makes it much easier to find and select content from HTML (i.e. screen scrape). Refer to the JSON Maven notes below for adding jsoup.
+- You do not need to, but you are welcome to, use jsoup (https://jsoup.org/) which is a Java HTML Parser, to do the flag scraping.  The downsides of using jsoup are you will first need to understand the Document Object Model (DOM) and CSS Selectors. These are both useful to know.  The upside of using jsoup is that it makes it much easier to find and select content from HTML (i.e. screen scrape). To add jsoup, you'll need to (1) add a Maven dependency clause to the pom.xml file, and (2) add the dependency to the File -> Project Structure -> Modules, Dependencies tab (click the + sign, click Jars or Directories, find your jsoup.jar file).
 
 ## HTML
 
 Refer to http://www.w3schools.com for good help on the basic HTML you need for this task. This has examples of drop-down boxes.
-
-## JSON
-
-JSON records are text records containing tag-value pairs, where the tag is the field name - think of it as a dictionary or map with nesting. It is much shorter than XML. In order to find what you need, use the JSON library GSON. To use GSON, download the gson v.2.8.6 jar file to a place you'll remember. To add it to your project, go to File->Project Structure->Modules, choose the Dependencies tab, click the + icon at the bottom choose Jars or Directories, navigate to where you put the jar file, click that, then Apply and OK. It should show up in your pom.xml file as the last entry in <dependiences> as:
-
-  ```
-  <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.8.6</version>
-  </dependency>
-  ```
-
-Finally, reload the Maven dependencies to have this new dependency take effect - an icon will probably appear in the pom.xml window, but if you don't see it, got to the Project View window, find the pom.xml entry (it should be near the bottom of the tree), right click it, choose Maven -> Reload Project.  
 
 ## SSLHandshakeException
 Some sites require you to make https, not http requests. When you do so from your Java program, you will hit an SSLHandshakeException. We will be covering SSL and related topics in a few weeks. In the meantime, you will have to deal with this exception.
@@ -278,7 +289,7 @@ Submit ***one*** PDF containing the following; each part should being with the h
 1. **Screen shots** of the input page, output page (one vote), results page
 2. **Code snippets** from the Java code that produces the output page and the results page.
 
-**New directions for the code:**
+**Directions for the code:**
 Create three zip files, each one of which is the zip of your WHOLE project for task 1, 2 and 3. For each project, zip the whole project, you need to use "File->Export Project->To Zip" in IDEA.
 
 Zip the one PDF and the three project zip files into one big zip file for submission.

@@ -279,11 +279,14 @@ Submit ***one*** PDF containing the following; each part should being with the h
 2. **Code snippets** of computation of each hash
 
 ### Task 2:
-1. **Screen shots** of input page, drop-down menu, output page for Collie and Whippet.
+1. **Screen shots** of input page, drop-down menu, output page for Pennsylvania and New York.
 2. **Code snippets** for:
-- scraping of intelligence
-- scraping of weight
-- api call for the picture, including choosing one at random.
+- scraping of nickname
+- scraping of capital
+- scraping of state song
+- scraping of flower URL
+- scraping of flag URL
+- api call for the population
 
 ### Task 3:
 1. **Screen shots** of the input page, output page (one vote), results page

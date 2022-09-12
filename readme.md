@@ -202,7 +202,7 @@ Track Piazza for additional hints and answers to questions.
 
 ## Deliverables
 
-In addition to your project code, produce screen shots showing two different dog breeds.
+In addition to your project code, produce screen shots showing two different states (see below).
 
 # Task 3 – Use the IntelliJ Project Name: Project1Task3
 
